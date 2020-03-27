@@ -52,11 +52,23 @@
                 </el-col>
             </el-row>
             <el-row v-if="fetchData.length">
+                <!-- <el-col :span="6">
+                    <div>
+                        <bar-chart
+                            :chart-data="{labels:this.globalChartLabels,datasets:this.globalChart}"
+                            :options="{responsive:true, maintainAspectRatio: false,legend:{position:'bottom'}, title:{text:'COVID-19 Chart OverTime',display:true}}"
+                            :height="400"
+                        ></bar-chart>
+                    </div>
+                </el-col>-->
                 <el-col :span="24">
-                    <line-chart
-                        :chart-data="{labels:this.graphLabels,datasets:this.graphData}"
-                        :options="{responsive:true,legend:{position:'bottom'}, title:{text:'COVID-19 Chart OverTime',display:true}}"
-                    ></line-chart>
+                    <div>
+                        <line-chart
+                            :chart-data="{labels:this.graphLabels,datasets:this.graphData}"
+                            :options="{responsive:true, maintainAspectRatio: false,legend:{position:'bottom'}, title:{text:'COVID-19 Total Confirmed',display:true}}"
+                            :height="400"
+                        ></line-chart>
+                    </div>
                 </el-col>
             </el-row>
             <el-row v-if="fetchData.length">
@@ -79,12 +91,14 @@
 <script>
 import loader from '@/components/loader'
 import LineChart from '@/components/lineChart'
+import BarChart from '@/components/barChart'
 
 export default {
     name: 'home',
     components: {
         loader,
         LineChart,
+        BarChart,
     },
     data() {
         return {
@@ -99,9 +113,11 @@ export default {
             lastValues: [],
             globalChart: [
                 {
-                    name: 'Confirmed Cases',
-                    chartType: 'pie',
-                    values: [],
+                    label: 'Confirmed',
+                    backgroundColor: '#2A7F62',
+                    borderColor: '#538083',
+                    data: [],
+                    fill: false,
                 },
             ],
             globalChartLabels: [],
@@ -175,16 +191,16 @@ export default {
                 })
             })
             .then(() => {
-                // Object.keys(this.informationData).forEach((country, i) => {
-                //     // this.globalChart.push({
-                //     //     confirmed: this.informationData[country].slice(-1)
-                //     //         .confirmed,
-                //     // })
-                //     this.globalChartLabels.push(country.toString())
-                //     this.globalChart[0].values.push(
-                //         this.informationData[country].slice(-1)[0].confirmed
-                //     )
-                // })
+                Object.keys(this.informationData).forEach((country, i) => {
+                    // this.globalChart.push({
+                    //     confirmed: this.informationData[country].slice(-1)
+                    //         .confirmed,
+                    // })
+                    this.globalChartLabels.push(country)
+                    this.globalChart[0].data.push(
+                        this.informationData[country].slice(-1)[0].confirmed
+                    )
+                })
             })
             .then((this.isLoading = false))
     },
