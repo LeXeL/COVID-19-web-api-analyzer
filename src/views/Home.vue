@@ -50,15 +50,21 @@
                         <h3>{{`New Recovered: ${lastValues.Recovered ? lastValues.Recovered - this.data[2].values[this.data[2].values.length - 2] : 'None'}`}}</h3>
                     </el-card>
                 </el-col>
-                <vue-frappe
-                    id="test"
-                    :labels="this.graphLabels"
-                    title="COVID-19 Chart OverTime"
-                    type="axis-mixed"
-                    :height="300"
-                    :colors="['#ffa00a', 'red', 'green']"
-                    :dataSets="this.data"
-                ></vue-frappe>
+            </el-row>
+            <el-row v-if="fetchData.length">
+                <el-col :span="24" class="chart--container">
+                    <vue-frappe
+                        id="test"
+                        :labels="this.graphLabels"
+                        title="COVID-19 Chart OverTime"
+                        type="axis-mixed"
+                        :height="300"
+                        :colors="['#ffa00a', 'red', 'green']"
+                        :dataSets="this.data"
+                    ></vue-frappe>
+                </el-col>
+            </el-row>
+            <el-row v-if="fetchData.length">
                 <el-collapse>
                     <el-collapse-item title="Table Data" name="2" type="info">
                         <el-table :data="fetchData" style="width: 100%" height="250">
@@ -72,6 +78,15 @@
                 </el-collapse>
             </el-row>
         </div>
+        <vue-frappe
+            id="test2"
+            :labels="this.globalChartLabels"
+            title="Global Confirmed Cases"
+            type="pie"
+            :maxSlices="10"
+            :maxLegendPoints="10"
+            :dataSets="this.globalChart"
+        ></vue-frappe>
     </el-row>
 </template>
 
@@ -94,6 +109,14 @@ export default {
             graphLabels: [],
             data: [],
             lastValues: [],
+            globalChart: [
+                {
+                    name: 'Confirmed Cases',
+                    chartType: 'pie',
+                    values: [],
+                },
+            ],
+            globalChartLabels: [],
         }
     },
     methods: {
@@ -157,14 +180,23 @@ export default {
                     }
                 })
             })
+            .then(() => {
+                Object.keys(this.informationData).forEach((country, i) => {
+                    // this.globalChart.push({
+                    //     confirmed: this.informationData[country].slice(-1)
+                    //         .confirmed,
+                    // })
+
+                    this.globalChartLabels.push(country.toString())
+                    this.globalChart[0].values.push(
+                        this.informationData[country].slice(-1)[0].confirmed
+                    )
+                })
+            })
             .then((this.isLoading = false))
     },
 }
 </script>
 
 <style>
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-    width: 200px;
-    min-height: 400px;
-}
 </style>
