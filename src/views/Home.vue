@@ -21,47 +21,42 @@
                             {{`Confirmed: ${lastValues.Confirmed ? lastValues.Confirmed : 'None'}`}}
                             <i
                                 v-if="lastValues.Confirmed"
-                                :style="this.data[0].values[this.data[0].values.length - 1] > this.data[0].values[this.data[0].values.length - 2] ? 'color:green' : 'color:#ffa00a'"
-                                :class="this.data[0].values[this.data[0].values.length - 1] > this.data[0].values[this.data[0].values.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
+                                :style="this.graphData[0].data[this.graphData[0].data.length - 1] > this.graphData[0].data[this.graphData[0].data.length - 2] ? 'color:green' : 'color:#ffa00a'"
+                                :class="this.graphData[0].data[this.graphData[0].data.length - 1] > this.graphData[0].data[this.graphData[0].data.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
                             ></i>
                         </h3>
                         <h3>
                             {{`Deaths: ${lastValues.Deaths ? lastValues.Deaths : 'None'}`}}
                             <i
                                 v-if="lastValues.Deaths"
-                                :style="this.data[1].values[this.data[1].values.length - 1] > this.data[1].values[this.data[1].values.length - 2] ? 'color:green' : 'color:#ffa00a'"
-                                :class="this.data[1].values[this.data[1].values.length - 1] > this.data[1].values[this.data[1].values.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
+                                :style="this.graphData[1].data[this.graphData[1].data.length - 1] > this.graphData[1].data[this.graphData[1].data.length - 2] ? 'color:green' : 'color:#ffa00a'"
+                                :class="this.graphData[1].data[this.graphData[1].data.length - 1] > this.graphData[1].data[this.graphData[1].data.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
                             ></i>
                         </h3>
                         <h3>
                             {{`Recovered: ${lastValues.Recovered ? lastValues.Recovered : 'None'}`}}
                             <i
                                 v-if="lastValues.Recovered"
-                                :style="this.data[2].values[this.data[2].values.length - 1] > this.data[2].values[this.data[2].values.length - 2] ? 'color:green' : 'color:#ffa00a'"
-                                :class="this.data[2].values[this.data[2].values.length - 1] > this.data[2].values[this.data[2].values.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
+                                :style="this.graphData[2].data[this.graphData[2].data.length - 1] > this.graphData[2].data[this.graphData[2].data.length - 2] ? 'color:green' : 'color:#ffa00a'"
+                                :class="this.graphData[2].data[this.graphData[2].data.length - 1] > this.graphData[2].data[this.graphData[2].data.length - 2] ? 'el-icon-top' : 'el-icon-minus'"
                             ></i>
                         </h3>
                     </el-card>
                 </el-col>
                 <el-col :span="12">
                     <el-card class="box-card" shadow="hover" :span="6">
-                        <h3>{{`New Confirmed: ${lastValues.Confirmed ? lastValues.Confirmed - this.data[0].values[this.data[0].values.length - 2] : 'None'}`}}</h3>
-                        <h3>{{`New Deaths: ${lastValues.Deaths ? lastValues.Deaths - this.data[1].values[this.data[1].values.length - 2] : 'None'}`}}</h3>
-                        <h3>{{`New Recovered: ${lastValues.Recovered ? lastValues.Recovered - this.data[2].values[this.data[2].values.length - 2] : 'None'}`}}</h3>
+                        <h3>{{`New Confirmed: ${lastValues.Confirmed ? lastValues.Confirmed - this.graphData[0].data[this.graphData[0].data.length - 2] : 'None'}`}}</h3>
+                        <h3>{{`New Deaths: ${lastValues.Deaths ? lastValues.Deaths - this.graphData[1].data[this.graphData[1].data.length - 2] : 'None'}`}}</h3>
+                        <h3>{{`New Recovered: ${lastValues.Recovered ? lastValues.Recovered - this.graphData[2].data[this.graphData[2].data.length - 2] : 'None'}`}}</h3>
                     </el-card>
                 </el-col>
             </el-row>
             <el-row v-if="fetchData.length">
-                <el-col :span="24" class="chart--container">
-                    <vue-frappe
-                        id="test"
-                        :labels="this.graphLabels"
-                        title="COVID-19 Chart OverTime"
-                        type="axis-mixed"
-                        :height="300"
-                        :colors="['#ffa00a', 'red', 'green']"
-                        :dataSets="this.data"
-                    ></vue-frappe>
+                <el-col :span="24">
+                    <line-chart
+                        :chart-data="{labels:this.graphLabels,datasets:this.graphData}"
+                        :options="{responsive:true,legend:{position:'bottom'}, title:{text:'COVID-19 Chart OverTime',display:true}}"
+                    ></line-chart>
                 </el-col>
             </el-row>
             <el-row v-if="fetchData.length">
@@ -78,25 +73,18 @@
                 </el-collapse>
             </el-row>
         </div>
-        <vue-frappe
-            id="test2"
-            :labels="this.globalChartLabels"
-            title="Global Confirmed Cases"
-            type="pie"
-            :maxSlices="10"
-            :maxLegendPoints="10"
-            :dataSets="this.globalChart"
-        ></vue-frappe>
     </el-row>
 </template>
 
 <script>
 import loader from '@/components/loader'
+import LineChart from '@/components/lineChart'
 
 export default {
     name: 'home',
     components: {
         loader,
+        LineChart,
     },
     data() {
         return {
@@ -107,7 +95,7 @@ export default {
             isLoading: false,
             fetchData: [],
             graphLabels: [],
-            data: [],
+            graphData: [],
             lastValues: [],
             globalChart: [
                 {
@@ -123,21 +111,27 @@ export default {
         checkTrend() {},
         fetchSelectedCountry() {
             let lastConfirmed = 0
-            this.data = [
+            this.graphData = [
                 {
-                    name: 'Confirmed',
-                    chartType: 'line',
-                    values: [],
+                    label: 'Confirmed',
+                    backgroundColor: '#FCCA46',
+                    borderColor: '#FCCA46',
+                    data: [],
+                    fill: false,
                 },
                 {
-                    name: 'Death',
-                    chartType: 'line',
-                    values: [],
+                    label: 'Death',
+                    backgroundColor: '#DB162F',
+                    borderColor: '#DB162F',
+                    data: [],
+                    fill: false,
                 },
                 {
-                    name: 'Recovered',
-                    chartType: 'line',
-                    values: [],
+                    label: 'Recovered',
+                    backgroundColor: '#53DD6C',
+                    borderColor: '#53DD6C',
+                    data: [],
+                    fill: false,
                 },
             ]
             this.graphLabels = []
@@ -146,9 +140,9 @@ export default {
                 ({date, confirmed, recovered, deaths}) => {
                     if (confirmed != 0) {
                         this.graphLabels.push(date)
-                        this.data[0].values.push(confirmed)
-                        this.data[1].values.push(deaths)
-                        this.data[2].values.push(recovered)
+                        this.graphData[0].data.push(confirmed)
+                        this.graphData[1].data.push(deaths)
+                        this.graphData[2].data.push(recovered)
                         this.fetchData.push({
                             date,
                             confirmed,
@@ -181,17 +175,16 @@ export default {
                 })
             })
             .then(() => {
-                Object.keys(this.informationData).forEach((country, i) => {
-                    // this.globalChart.push({
-                    //     confirmed: this.informationData[country].slice(-1)
-                    //         .confirmed,
-                    // })
-
-                    this.globalChartLabels.push(country.toString())
-                    this.globalChart[0].values.push(
-                        this.informationData[country].slice(-1)[0].confirmed
-                    )
-                })
+                // Object.keys(this.informationData).forEach((country, i) => {
+                //     // this.globalChart.push({
+                //     //     confirmed: this.informationData[country].slice(-1)
+                //     //         .confirmed,
+                //     // })
+                //     this.globalChartLabels.push(country.toString())
+                //     this.globalChart[0].values.push(
+                //         this.informationData[country].slice(-1)[0].confirmed
+                //     )
+                // })
             })
             .then((this.isLoading = false))
     },
