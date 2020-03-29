@@ -70,10 +70,19 @@
                         ></line-chart>
                     </div>
                 </el-col>
+                <el-col :span="24">
+                    <div>
+                        <line-chart
+                            :chart-data="checkTrend()"
+                            :options="{responsive:true, maintainAspectRatio: false,legend:{position:'bottom'}, title:{text:'COVID-19 Total Confirmed',display:true}}"
+                            :height="400"
+                        ></line-chart>
+                    </div>
+                </el-col>
             </el-row>
             <el-row v-if="fetchData.length">
                 <el-collapse>
-                    <el-collapse-item title="Table Data" name="2" type="info">
+                    <el-collapse-item title="Table Data" name="1" type="info">
                         <el-table :data="fetchData" style="width: 100%" height="250">
                             <el-table-column prop="date" label="Date" width="180"></el-table-column>
                             <el-table-column prop="confirmed" label="Confirmed" width="180"></el-table-column>
@@ -124,7 +133,30 @@ export default {
         }
     },
     methods: {
-        checkTrend() {},
+        checkTrend() {
+            let lastConfirmed = 0
+            let trendData = [
+                {
+                    label: 'Trend',
+                    backgroundColor: '#FCCA46',
+                    borderColor: '#3993DD',
+                    data: [],
+                    fill: false,
+                },
+            ]
+            let labels = []
+            this.informationData[this.selectedCountry].forEach(
+                ({date, confirmed, recovered, deaths}) => {
+                    if (confirmed != 0) {
+                        trendData[0].data.push(confirmed - lastConfirmed)
+                        labels.push(confirmed)
+                        lastConfirmed = confirmed
+                    }
+                }
+            )
+
+            return {labels, datasets: trendData}
+        },
         fetchSelectedCountry() {
             let lastConfirmed = 0
             this.graphData = [
@@ -192,10 +224,6 @@ export default {
             })
             .then(() => {
                 Object.keys(this.informationData).forEach((country, i) => {
-                    // this.globalChart.push({
-                    //     confirmed: this.informationData[country].slice(-1)
-                    //         .confirmed,
-                    // })
                     this.globalChartLabels.push(country)
                     this.globalChart[0].data.push(
                         this.informationData[country].slice(-1)[0].confirmed
